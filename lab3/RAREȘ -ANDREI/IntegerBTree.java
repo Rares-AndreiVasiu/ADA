@@ -284,6 +284,134 @@ public class IntegerBTree {
         }
     }
 
+    public void inorder() {
+        inorderTraversal(root);
+    }
+
+    private void inorderTraversal(BTreeNode node) {
+        if (node != null) {
+            // Traverse the left subtree
+            for (int i = 0; i < node.n; i++) {
+                inorderTraversal(node.child[i]);
+                // Print the key
+                System.out.print(node.key[i] + " ");
+            }
+            // Traverse the right subtree
+            inorderTraversal(node.child[node.n]);
+        }
+    }
+
+    public int successor(int key) {
+        BTreeNode node = search(root, key);
+        if (node == null) {
+            return Integer.MIN_VALUE; // Key not found, return minimum value
+        }
+
+        if (node.leaf && node.key[node.n - 1] > key) {
+            return node.key[node.n - 1]; // Successor is the largest key in the node
+        }
+
+        int index = findKeyIndex(node, key);
+        if (index < node.n && node.key[index] == key) {
+            // If key is found in the node, find the leftmost key of the right subtree
+            return findLeftmostKey(node.child[index + 1]);
+        } else {
+            // Key not found in the node, recursively find in the appropriate subtree
+            return findSuccessor(root, key);
+        }
+    }
+
+    private int findSuccessor(BTreeNode node, int key) {
+        int index = findKeyIndex(node, key);
+        if (index < node.n && node.key[index] == key) {
+            // If key is found in the node, find the leftmost key of the right subtree
+            return findLeftmostKey(node.child[index + 1]);
+        } else if (node.leaf) {
+            return Integer.MIN_VALUE; // Key not found in tree
+        } else {
+            // Recursively find in the appropriate subtree
+            return findSuccessor(node.child[index], key);
+        }
+    }
+
+    private int findLeftmostKey(BTreeNode node) {
+        if (node == null) {
+            return Integer.MIN_VALUE; // Invalid node
+        }
+        BTreeNode current = node;
+        while (!current.leaf) {
+            current = current.child[0];
+        }
+        return current.key[0];
+    }
+
+    public int predecessor(int key) {
+        BTreeNode node = search(root, key);
+        if (node == null) {
+            return Integer.MAX_VALUE; // Key not found, return maximum value
+        }
+
+        if (node.leaf && node.key[0] < key) {
+            return node.key[0]; // Predecessor is the smallest key in the node
+        }
+
+        int index = findKeyIndex(node, key);
+        if (index > 0 && node.key[index] == key) {
+            // If key is found in the node, find the rightmost key of the left subtree
+            return findRightmostKey(node.child[index]);
+        } else {
+            // Key not found in the node, recursively find in the appropriate subtree
+            return findPredecessor(root, key);
+        }
+    }
+
+    private int findPredecessor(BTreeNode node, int key) {
+        int index = findKeyIndex(node, key);
+        if (index > 0 && node.key[index] == key) {
+            // If key is found in the node, find the rightmost key of the left subtree
+            return findRightmostKey(node.child[index]);
+        } else if (node.leaf) {
+            return Integer.MAX_VALUE; // Key not found in tree
+        } else {
+            // Recursively find in the appropriate subtree
+            return findPredecessor(node.child[index], key);
+        }
+    }
+
+    private int findRightmostKey(BTreeNode node) {
+        if (node == null) {
+            return Integer.MAX_VALUE; // Invalid node
+        }
+        BTreeNode current = node;
+        while (!current.leaf) {
+            current = current.child[current.n];
+        }
+        return current.key[current.n - 1];
+    }
+
+    private BTreeNode search(BTreeNode x, int key) {
+        int i = 0;
+        while (i < x.n && key > x.key[i]) {
+            i++;
+        }
+        if (i < x.n && key == x.key[i]) {
+            return x;
+        } else if (x.leaf) {
+            return null;
+        } else {
+            return search(x.child[i], key);
+        }
+    }
+
+    private int findKeyIndex(BTreeNode node, int key) {
+        int index = 0;
+        while (index < node.n && key > node.key[index]) {
+            index++;
+        }
+        return index;
+    }
+
+
     public static void main(String[] args)
     {
         IntegerBTree b = new IntegerBTree(3);
